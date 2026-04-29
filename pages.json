@@ -1,0 +1,90 @@
+{
+	"condition": { //模式配置，仅开发期间生效
+		"current": 0, //当前激活的模式（list 的索引项）
+		"list": [{
+			"name": "test",
+			"path": "/pages/photo/index",
+			"query": "goLogin=true&index=0"
+		}]
+	},
+	"subPackages": [{
+		"root": "pages/xrframe",
+		"pages": [
+			{
+				"path": "index",
+				"style": {
+					"navigationBarTitleText": "六合博物馆"
+				}
+			},
+			{
+				"path": "xrtracker",
+				"style": {
+					"navigationBarTitleText": "XR",
+					// #ifdef MP-WEIXIN
+					"usingComponents": {
+						"xr-tracker": "/wxcomponents/xrtracker/index"
+					}
+					// #endif
+				}
+			}
+		]
+	}],
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/home/index",
+			"style": {
+				"navigationBarTitleText": "六合博物馆",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/photo/index",
+			"style": {
+				"navigationBarTitleText": "智能合拍",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/photo/part/create",
+			"style": {
+				"navigationBarTitleText": "越王旨翳剑",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/pavilion/index",
+			"style": {
+				"navigationBarTitleText": "展馆讲解",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/pavilion/part/list",
+			"style": {
+				"navigationBarTitleText": "楼层",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/pavilion/part/detail",
+			"style": {
+				"navigationBarTitleText": "详情",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mine/part/myphoto",
+			"style": {
+				"navigationBarTitleText": "我的相册",
+				"navigationStyle": "custom"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"uniIdRouter": {}
+}
