@@ -1,74 +1,75 @@
 import {
 	Request,
 	BaseURL,
-	Header,
-	UploadImage
+	Header
 } from './request.js';
 
+const UploadFile = (data) => {
+	return new Promise((resolve, reject) => {
+		const types = {
+			image: 'images',
+			video: 'videos'
+		};
 
-// 小程序登录注册
-const WxCodeQuery = (data) => {
-	return Request('post', '/jtour-yjy-client/sso/customer/queryCustomerPhoneByCode', data);
-}
+		let url = BaseURL + `/api/oss/files`;
+		console.log(data.filePath);
+		uni.uploadFile({
+			url: url,
+			filePath: data.filePath,
+			name: 'file', 
+			header: Header(),
+			formData: data.formData || {},
+			success: (res) => {
+				try {
+					if (res.statusCode === 200) {
+						let result = typeof res.data === 'object' ?
+							res.data :
+							JSON.parse(res.data);
+						resolve(result); // ✅ 返回成功
+					} else {
+						reject(res.statusCode);
+					}
+				} catch (e) {
+					reject(e);
+				}
+			},
+			fail: (err) => {
+				reject(err);
+			},
+			complete: () => {
+				if (data.complete) data.complete();
+			}
+		});
+	});
+};
 
-const WxCodeLogin = (data) => {
-	return Request('post', '/jtour-yjy-client/sso/customer/wechatLoginByOldMemberV3', data);
-}
 
-const WxMiniLogin = (data) => {
-	return Request('post', '/jtour-yjy-client/sso/customer/wechatLoginV3', data);
-}
 
 // 获取自己的信息
 const GetUserinfo = (data) => {
-	return Request('get', '/userinfo', data);
+	return Request('get', '/api/user-info', data);
 }
 
-// 更新用户信息
-const UpdateUser = (data) => {
-	return Request('put', '/users', data);
+
+// 小程序登录注册
+const WxMiniLogin = (data) => {
+	return Request('post', '/api/wxmini-login', data);
 }
 
-const GetValidTheme = (data) => {
-	return Request('post', '/jtour-yjy-client/mpApp/getValidTheme', data);
+
+// 上传 base64 图片
+const UploadImages = (data) => {
+	return Request('post', '/api/images', data);
+}
+const OssImages = (data) => {
+	return Request('post', '/api/oss/files', data);
 }
 
-// 生图
-const GenerateTheme = (data) => {
-	return Request('post', '/jtour-yjy-client/mpApp/generateTheme', data);
-}
-
-// 获取相册
-const GetThemeUserRecord = (data) => {
-	return Request('post', '/jtour-yjy-client/mpApp/getThemeUserRecord', data);
-}
-
-// 获取节点信息
-const GetPoiList = (data) => {
-	return Request('get', '/afanti-api/intelligentGuide/getPoiList', data);
-}
-
-// 获取信息点的具体信息
-const GetScenicDetail = (data) => {
-	return Request('get', '/afanti-api/intelligentGuide/getScenicDetails', data);
-}
-
-// 获取信息点的具体信息
-const GetPoiDetail = (data) => {
-	return Request('get', '/afanti-api/intelligentGuide/getPoiDetails', data);
-}
 
 export {
-	WxCodeQuery,
-	WxCodeLogin,
-	WxMiniLogin,
+	UploadFile,
 	GetUserinfo,
-	UpdateUser,
-	GetValidTheme,
-	UploadImage,
-	GenerateTheme,
-	GetThemeUserRecord,
-	GetPoiList,
-	GetScenicDetail,
-	GetPoiDetail
+	WxMiniLogin,
+	UploadImages,
+	OssImages
 }

@@ -1,9 +1,10 @@
-import { md5 } from '@/static/js/md5.js';
-
-import { useUser } from '@/store/user.js';
-
-const BaseURL = "https://joy.joyuai.com";
-						
+import {
+	md5
+} from '@/static/js/md5.js';
+import {
+	useUser
+} from '@/store/user.js';
+const BaseURL = "https://lnrz.17vision.com";
 // 获取 token
 function GetToken() {
 	const token = uni.getStorageSync('token');
@@ -22,21 +23,14 @@ function SetToken(token, expires_in) {
 	})
 }
 
-function RemoveToken() {
-	uni.removeStorageSync('token')
-}
-
 function Header() {
-	const secret = "Abc2fZ0Rv8";
+	const secret = "kN7hT7jU4aU2";
 	const time = new Date().getTime();
 	const token = GetToken();
 	return {
 		'Authorization': `Bearer ${token}`,
 		'Content-Type': 'application/json',
 		'Time': time,
-		'token': token,
-		'primarychannelid': 99999,
-		'platform': 'wxmp',
 		'Sign': md5(secret + time)
 	}
 }
@@ -44,9 +38,8 @@ function Header() {
 function Request(method, url, data, config = {}) {
 	const {
 		loading = true,
-		redirect = true
+			redirect = true
 	} = config;
-	
 	const urls = ['login/wxmini'];
 
 	if (!urls.includes(url) && loading) {
@@ -54,15 +47,11 @@ function Request(method, url, data, config = {}) {
 			title: '请求中，请稍等…'
 		});
 	}
-	
+
 	if (!data) {
 		data = {};
 	}
-	
-	if (method != 'get') {
-		data = JSON.stringify(data)
-	}
-	
+
 	const header = Header();
 	return new Promise((resolve, reject) => {
 		uni.request({
@@ -91,13 +80,13 @@ function Request(method, url, data, config = {}) {
 							url: '/pages/login/login'
 						})
 					}
-					user.loginOut()
+					user.logout()
 					reject({
 						message: '登录已过期，请重新登录'
 					});
 				} else {
 					reject({
-						message: '请求失败，请联系管理员'
+						message: res.data?.message || '请求失败，请联系管理员'
 					});
 				}
 			},
@@ -112,51 +101,9 @@ function Request(method, url, data, config = {}) {
 		})
 	});
 }
-
-/**
- * 上传单张图片
- * @param {string} filePath - 本地临时文件路径
- * @param {string} fileName - 自定义文件名（可选）
- */
-function UploadImage(filePath, fileName = '') {
-  return new Promise((resolve, reject) => {
-    const defaultName = filePath.split('/').pop() || 'image.png';
-    const finalFileName = fileName || defaultName;
-    
-    uni.uploadFile({
-      url: BaseURL + '/jtour-yjy-client/upload/image',
-      filePath: filePath,
-      name: 'file', // 对应 form-data 中的 name="file"
-      fileName: finalFileName,
-      header: {
-		'token': GetToken(),
-		'primarychannelid': 99999,
-		'platform': 'wxmp',
-      },
-      success: (res) => {
-        if (res.statusCode === 200) {
-          try {
-            const data = JSON.parse(res.data);
-            resolve(data);
-          } catch (e) {
-            resolve(res.data);
-          }
-        } else {
-          reject(new Error(`上传失败: ${res.statusCode}`));
-        }
-      },
-      fail: (err) => {
-        reject(err);
-      }
-    });
-  });
-}
-
 export {
 	Request,
 	BaseURL,
 	Header,
-	SetToken,
-	RemoveToken,
-	UploadImage
+	SetToken
 }

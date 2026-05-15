@@ -1,51 +1,85 @@
-import { defineStore } from 'pinia'
-import { SetToken, RemoveToken } from '../api/request';
+import {
+	defineStore
+} from 'pinia'
+import {
+	SetToken
+} from '../api/request';
 
-const fillable = ['userId', 'phone', 'nickname', 'avatar']
+const fillable = ['uid', 'nickname', 'avatar', 'gender', 'token']
 
 const useUser = defineStore('user', {
 	state: () => ({
+		uid: uni.getStorageSync('uid', ''),
+		gender: uni.getStorageSync('gender', ''),
+		avatar: uni.getStorageSync('avatar') || '',
 		userId: uni.getStorageSync('userId', 0),
 		nickname: uni.getStorageSync('nickname', ''),
-		phone: uni.getStorageSync('phone', ''),
-		avatar: uni.getStorageSync('avatar') || '',
-		loginAt: uni.getStorageSync('loginAt') || 0
+		loginAt: uni.getStorageSync('loginAt') || 0,
+		info: uni.getStorageSync('info') || {},
 	}),
 	getters: {
-		logined: (state) =>{
-			if (!state.loginAt) {
-				return false;
+		logined: (state) => {
+			const token = uni.getStorageSync('token')
+			if (token) {
+				const now = (new Date()).getTime() / 1000
+				if (token.expires_at > now) {
+					return true
+				}
 			}
-			
-			// 登录保持三个小时吧
-			if ((new Date()).getTime() - state.loginAt > 1000 * 60 * 60 * 3) {
-				return false
-			}		
-			return true
+
+			return false
+		},
+		getInfo: (state) => {
+			return state.info
 		}
 	},
 	actions: {
-		setUser(value) {
+		setToken(token, expires_in) {
+			SetToken(token, expires_in)
+		},
+		setObject(value) {
 			if (value && typeof value == 'object') {
 				for (let key in value) {
 					if (fillable.includes(key)) {
 						uni.setStorageSync(key, value[key])
+
 						this[key] = value[key]
 					}
 				}
 			}
-			
-			if(value && value.token) {
-				SetToken(value.token, 60 * 60 * 24)
-				
-				const time = (new Date()).getTime()
-				uni.setStorageSync('loginAt', time)
-				this['loginAt'] = time
+		},
+		setUser(value) {
+			const data = {
+				uid: value.id,
+				avatar: value.avatar,
+				gender: value.gender,
+				nickname: value.nickname,
+				signature: value.signature,
+				user_extend: value.user_extend,
+				in_days: value.in_days,
 			}
+			this.setObject(data)
+
+			this.privateLogin = true
+		},
+		setInfo(data) {
+			const fullName = data.username;
+			const firstName = fullName.charAt(0) || '';
+			const suffix = data.gender === 1 ? '先生' : '女士';
+			const info = {
+				gender: data.gender,
+				gender_str: data.gender_str,
+				age: data.age,
+				retirement_status: data.retirement_status,
+				retirement_status_str: data.retirement_status_str,
+				username: data.username,
+				firstName: `${firstName}${suffix}`,
+			}
+			this.info = info
+			uni.setStorageSync('info', info)
 		},
 		logout() {
-			RemoveToken()
-			
+
 			fillable.forEach((key) => {
 				uni.removeStorageSync(key)
 				if (key == 'userId') {
@@ -54,11 +88,13 @@ const useUser = defineStore('user', {
 					this[key] = ''
 				}
 			})
-			
+
 			uni.removeStorageSync('loginAt')
 			this['loginAt'] = 0
 		}
 	}
 })
 
-export { useUser }
+export {
+	useUser
+}
