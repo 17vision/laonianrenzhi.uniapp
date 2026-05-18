@@ -1,7 +1,8 @@
 <template>
 	<view class="screen active">
 		<view class="title">评估完成</view>
-		<view class="">等待医护人员评估确认</view>
+		<!-- 加大加粗的提示文字 -->
+		<view class="wait-tip">等待医护人员评估确认</view>
 		<view class="result-box" :class="{ normal: totalScore >= 27, abnormal: totalScore < 27 }">
 			<view class="total-title">总分：{{ totalScore }}/30分</view>
 			<view class="level-text">{{ levelText }}</view>
@@ -61,6 +62,16 @@ const levelText = computed(() => {
 	text-align: center;
 	margin: 20rpx 0;
 }
+
+/* 加大加粗的提示样式 */
+.wait-tip {
+	font-size: 32rpx;
+	font-weight: 600;
+	text-align: center;
+	color: #f59e0b;
+	margin: 20rpx 0;
+}
+
 .result-box {
 	padding: 34rpx;
 	border-radius: 24rpx;

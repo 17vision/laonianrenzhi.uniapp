@@ -1,15 +1,19 @@
 <script>
-
+import islogin from '@/api/login.js';
 export default {
-	onLaunch() {
+	async onLaunch() {
+		await islogin();
 	},
 
 	onShow() {},
-	onHide() {},
+	onHide() {}
 };
 </script>
 
 <style lang="scss">
+@import '@/static/css/base.scss';
+@import '@/static/css/app.scss';
+
 page,
 .container {
 	display: flex;
@@ -17,7 +21,4 @@ page,
 	width: 750upx;
 	min-height: 100vh;
 }
-
-@import '@/static/css/base.scss';
-@import '@/static/css/app.scss';
 </style>

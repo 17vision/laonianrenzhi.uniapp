@@ -40,7 +40,7 @@
 
 			<!-- 空状态 -->
 			<view class="empty-wrap" v-if="!pendingList.length && !historyList.length">
-				<image class="empty-img" src="/static/empty.png" mode="aspectFit" />
+				<!-- <image class="empty-img" src="/static/empty.png" mode="aspectFit" /> -->
 				<text class="empty-text">暂无评估记录</text>
 			</view>
 

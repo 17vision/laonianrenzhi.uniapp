@@ -28,41 +28,40 @@ const emit = defineEmits(['go', 'submit']);
 // 用户输入
 const userAnswers = ref(['', '', '']);
 
-// 缓存里的记忆题目对象
-let memoryItem = ref(null);
-
 // ==========================
-// 恢复缓存（直接拿完整对象）
+// 修复：缓存回显（深度读取 + 强制赋值）
 // ==========================
 const restoreCache = () => {
-	if (!props.form?.memory_training) return;
-
-	// 直接拿到上一页的完整结构，不手写任何字段
-	memoryItem.value = props.form.memory_training[0];
-
-	// 恢复答案
-	if (memoryItem.value?.answer) {
-		userAnswers.value = memoryItem.value.answer;
-	}
+	if (!props.form?.questions) return;
+	
+	// 找到记忆题
+	const memoryItem = props.form.questions.find(q => q.key === 'memory_items');
+	console.log(memoryItem);
+	if (!memoryItem) return;
+	
+	// 安全回显答案
+	const answer = memoryItem.userAnswer || [];
+	userAnswers.value[0] = answer[0] || '';
+	userAnswers.value[1] = answer[1] || '';
+	userAnswers.value[2] = answer[2] || '';
 };
 
 // ==========================
-// 提交：直接修改 answer 后原样提交
+// 提交
 // ==========================
 const handleNext = () => {
-	if (userAnswers.value.some((item) => !item)) {
+	if (userAnswers.value.some(item => !item.trim())) {
 		uni.showToast({ title: '请填写全部3个物品', icon: 'none' });
 		return;
 	}
 
-	// 只修改答案，其他完全不变
-	memoryItem.value.answer = userAnswers.value;
+	const questions = props.form.questions || [];
+	const idx = questions.findIndex(q => q.key === 'memory_items');
+	if (idx !== -1) {
+		questions[idx].userAnswer = userAnswers.value;
+	}
 
-	// 直接提交缓存里的原结构
-	emit('submit', {
-		memory_training: [memoryItem.value]
-	});
-
+	emit('submit', { questions });
 	emit('go', 'q6');
 };
 
@@ -93,10 +92,12 @@ watch(() => props.form, restoreCache, { deep: true });
 	height: 10rpx;
 	background: #edf1f5;
 	border-radius: 999rpx;
+	overflow: hidden;
 }
 .progress-bar {
 	height: 100%;
 	background: linear-gradient(90deg, #3b82f6, #22c55e);
+	transition: width 0.3s ease;
 }
 .card {
 	background: #fff;
@@ -117,14 +118,18 @@ watch(() => props.form, restoreCache, { deep: true });
 	font-size: 28rpx;
 	background: #f7f8fa;
 	margin-bottom: 15rpx;
+	border: none;
+	outline: none;
 }
 .btn {
 	width: 100%;
+	height: 88rpx;
 	border-radius: 18rpx;
 	font-size: 30rpx;
 	margin: 18rpx 0;
 	background: linear-gradient(135deg, #3b82f6, #2563eb);
 	color: #fff;
 	border: none;
+	outline: none;
 }
 </style>

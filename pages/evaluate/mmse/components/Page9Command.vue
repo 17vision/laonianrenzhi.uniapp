@@ -15,7 +15,10 @@
 
 		<view class="card">
 			<view class="bold">阅读执行：请闭上眼睛</view>
-			<input class="input" v-model="readInput" placeholder="输入执行结果（已完成/未完成）" />
+			<view class="select-group">
+				<button class="select-btn" :class="readInput === '已完成' ? 'active' : ''" @click="readInput = '已完成'">已完成</button>
+				<button class="select-btn" :class="readInput === '未完成' ? 'active' : ''" @click="readInput = '未完成'">未完成</button>
+			</view>
 		</view>
 
 		<button class="btn" @click="handleNext">下一页</button>
@@ -39,18 +42,17 @@ const CompareType = {
 };
 
 // ==========================
-// 统一表单结构
+// ✅ 题目结构 100% 对齐 questions
 // ==========================
 const formFields = ref([
 	{
 		key: 'command_3_steps',
 		label: '三步指令执行',
 		type: 'command',
-		total_score: 1,
-		score: 0,
-		compare_type: CompareType.Equal,
+		total_score: 3,
+		compare_type: CompareType.Include,
 		value: '举起右手,摸鼻子,眨眼睛',
-		answer: '',
+		userAnswer: '',
 		module: 'command_ability',
 		module_name: '指令执行能力'
 	},
@@ -59,10 +61,9 @@ const formFields = ref([
 		label: '闭眼指令执行',
 		type: 'command',
 		total_score: 1,
-		score: 0,
 		compare_type: CompareType.Equal,
 		value: '已完成',
-		answer: '',
+		userAnswer: '',
 		module: 'command_ability',
 		module_name: '指令执行能力'
 	}
@@ -80,7 +81,7 @@ const validateAll = () => {
 };
 
 // ==========================
-// 提交：统一规范格式
+// ✅ 提交：自动加入 questions
 // ==========================
 const handleNext = () => {
 	if (!validateAll()) {
@@ -88,23 +89,41 @@ const handleNext = () => {
 		return;
 	}
 
-	formFields.value[0].answer = commandInput.value;
-	formFields.value[1].answer = readInput.value;
+	// 保存答案
+	formFields.value[0].userAnswer = commandInput.value;
+	formFields.value[1].userAnswer = readInput.value;
 
-	emit('submit', {
-		command_ability: formFields.value
+	// 合并到全局 questions（和你所有题目统一）
+	const questions = props.form.questions || [];
+	formFields.value.forEach((item) => {
+		const idx = questions.findIndex((q) => q.key === item.key);
+		if (idx >= 0) {
+			questions[idx] = { ...questions[idx], ...item };
+		} else {
+			questions.push(item);
+		}
 	});
+
+	emit('submit', { questions });
 	emit('go', 'q8');
 };
 
 // ==========================
-// 缓存回填
+// ✅ 缓存恢复
 // ==========================
 const restoreCache = () => {
-	if (!props.form) return;
-	const data = props.form.command_ability || [];
-	if (data.length >= 1) commandInput.value = data[0].answer || '';
-	if (data.length >= 2) readInput.value = data[1].answer || '';
+	if (!props.form?.questions) return;
+	const questions = props.form.questions;
+
+	formFields.value.forEach((field) => {
+		const target = questions.find((q) => q.key === field.key);
+		if (target) {
+			field.userAnswer = target.userAnswer;
+		}
+	});
+
+	commandInput.value = formFields.value[0].userAnswer || '';
+	readInput.value = formFields.value[1].userAnswer || '';
 };
 
 onMounted(() => restoreCache());
@@ -151,6 +170,32 @@ watch(() => props.form, restoreCache, { deep: true });
 	text-align: center;
 	margin-bottom: 15rpx;
 }
+.text-center {
+	text-align: center;
+}
+
+/* 选择按钮样式 */
+.select-group {
+	display: flex;
+	gap: 20rpx;
+	margin-top: 20rpx;
+}
+.select-btn {
+	flex: 1;
+	height: 80rpx;
+	line-height: 80rpx;
+	text-align: center;
+	border-radius: 16rpx;
+	background: #f7f8fa;
+	font-size: 28rpx;
+	border: 2rpx solid transparent;
+}
+.select-btn.active {
+	background: #3b82f6;
+	color: #fff;
+	border-color: #2563eb;
+}
+
 .input {
 	width: 100%;
 	height: 84rpx;

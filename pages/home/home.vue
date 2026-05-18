@@ -13,7 +13,7 @@
 					<view class="avatar">👋</view>
 
 					<view class="text-box">
-						<view class="name">{{ greetingText }}，{{ userStore.info?.firstName }}</view>
+						<view class="name">{{ greetingName }}</view>
 
 						<view class="tip">
 							您当前共有
@@ -23,7 +23,7 @@
 					</view>
 				</view>
 
-				<view class="voice-btn">🔊</view>
+				<view class="voice-btn" @tap="playVoice">🔊</view>
 			</view>
 
 			<!-- 训练任务 -->
@@ -99,13 +99,9 @@
 				<view class="section-title">⚡ 快速入口</view>
 
 				<view class="button-group">
-					<button class="btn btn-primary" @tap="handleTraining">
-						训练计划
-					</button>
+					<button class="btn btn-primary" @tap="handleTraining">训练计划</button>
 
-					<button class="btn btn-outline" @tap="handleEvaluate">
-						评估任务
-					</button>
+					<button class="btn btn-outline" @tap="handleEvaluate">评估任务</button>
 				</view>
 			</view>
 		</template>
@@ -116,6 +112,7 @@
 import { computed, ref } from 'vue';
 import { onShow, onPullDownRefresh } from '@dcloudio/uni-app';
 
+import { playTTS } from '@/utils/tts.js';
 import { Request } from '@/api/request.js';
 import { useUser } from '@/store/user.js';
 
@@ -138,6 +135,27 @@ const greetingText = computed(() => {
 	return '晚上好';
 });
 
+const greetingName = computed(() => {
+	const name = userStore.info?.firstName || '';
+
+	return name ? `${greetingText.value}，${name}` : greetingText.value;
+});
+
+const voiceText = computed(() => {
+	const name = userStore.info?.firstName || '您好';
+
+	const task = taskCount.value;
+
+	if (!task) {
+		return `${greetingText.value}，${name}。今天暂无待办任务，祝您今天心情愉快。`;
+	}
+
+	return `${greetingText.value}，${name}。您当前共有${task}项待办事项，请记得及时完成训练与评估。`;
+});
+
+const playVoice = () => {
+	playTTS(voiceText.value);
+};
 // 训练数量
 const trainCount = computed(() => {
 	return trainList.value.reduce((sum, item) => {
@@ -182,26 +200,33 @@ const init = async () => {
 		loading.value = true;
 
 		const [assessRes, trainRes] = await Promise.all([
-			Request('get', '/api/follow-up-plans', {
-				page: 1,
-				limit: 1
-			}),
-			Request('get', '/api/patient-plans', {
-				page: 1,
-				limit: 10
-			})
+			Request(
+				'get',
+				'/api/follow-up-plans',
+				{
+					page: 1,
+					limit: 1
+				},
+				{
+					redirect: false
+				}
+			),
+			Request(
+				'get',
+				'/api/patient-plans',
+				{
+					page: 1,
+					limit: 10
+				},
+				{
+					redirect: false
+				}
+			)
 		]);
 
 		assessList.value = assessRes?.data || [];
 
 		trainList.value = trainRes?.data || [];
-	} catch (err) {
-		console.log(err);
-
-		uni.showToast({
-			title: '数据加载失败',
-			icon: 'none'
-		});
 	} finally {
 		loading.value = false;
 
@@ -215,7 +240,7 @@ onPullDownRefresh(() => {
 });
 
 onShow(() => {
-	init();
+	setTimeout(init, 1000);
 });
 </script>
 

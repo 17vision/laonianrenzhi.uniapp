@@ -18,12 +18,11 @@
 		</view>
 
 		<view class="card">
-			<view>请复述：四十四只石狮子</view>
+			<view>请复述：{{ randomSentence }}</view>
 			<input class="input" v-model="repeatText" placeholder="文字输入复述内容" />
 
 			<view class="flex-row gap-10">
 				<button class="btn btn-record" @click="toggleRecord">{{ recordBtnText }}</button>
-				<!-- <button class="btn btn-green" @click="checkLanguage">提交判分</button> -->
 			</view>
 		</view>
 
@@ -48,7 +47,7 @@ const CompareType = {
 };
 
 // ==========================
-// 物品库（可无限加）
+// 物品库
 // ==========================
 const allItemPool = ref([
 	{ icon: '🧊', standard: '冰块' },
@@ -68,7 +67,10 @@ const allItemPool = ref([
 	{ icon: '🍰', standard: '蛋糕' }
 ]);
 
-// 随机抽取 2 个
+// 复述句子库（可自由增删）
+const sentencePool = ref(['四十四只石狮子', '粉红墙上画凤凰', '化肥会挥发', '黑化肥发灰', '吃葡萄不吐葡萄皮', '班干部管班干部']);
+
+// 随机抽取2个物品
 const randomItems = ref([]);
 const pickRandomItems = () => {
 	let arr = [...allItemPool.value];
@@ -83,20 +85,25 @@ const pickRandomItems = () => {
 	}));
 };
 
+// 随机抽取复述句子
+const randomSentence = ref('');
+const pickRandomSentence = () => {
+	const idx = Math.floor(Math.random() * sentencePool.value.length);
+	randomSentence.value = sentencePool.value[idx];
+};
+
 // ==========================
-// 统一表单结构
+// 题目结构 对齐现有 questions
 // ==========================
 const formFields = ref([
 	{
 		key: 'language_naming',
 		label: '物品命名',
 		type: 'language',
+		total_score: 2,
 		compare_type: CompareType.Include,
-		total_score: 4,
-		score: 0,
-		icons: [],
 		value: [],
-		answer: [],
+		userAnswer: [],
 		module: 'language_ability',
 		module_name: '语言能力'
 	},
@@ -105,10 +112,9 @@ const formFields = ref([
 		label: '句子复述',
 		type: 'language',
 		total_score: 2,
-		score: 0,
 		compare_type: CompareType.Include,
-		value: '四十四只石狮子',
-		answer: '',
+		value: '', // 随机句子存在这里
+		userAnswer: '',
 		module: 'language_ability',
 		module_name: '语言能力'
 	}
@@ -166,21 +172,6 @@ const toggleRecord = () => {
 	}
 };
 
-// 判分
-const checkLanguage = () => {
-	for (let item of randomItems.value) {
-		if (!item.userAnswer.trim()) {
-			uni.showToast({ title: '请输入所有物品名称', icon: 'none' });
-			return;
-		}
-	}
-	if (!repeatText.value.trim()) {
-		uni.showToast({ title: '请输入复述内容', icon: 'none' });
-		return;
-	}
-	uni.showToast({ title: '提交完成', icon: 'success' });
-};
-
 // 校验
 const validateAll = () => {
 	for (let item of randomItems.value) {
@@ -191,7 +182,7 @@ const validateAll = () => {
 };
 
 // ==========================
-// ✅ 提交：带图标
+// 提交存入 questions
 // ==========================
 const handleNext = () => {
 	if (!validateAll()) {
@@ -199,18 +190,26 @@ const handleNext = () => {
 		return;
 	}
 
-	const icons = randomItems.value.map((i) => i.icon);
-	const standards = randomItems.value.map((i) => i.standard);
-	const answers = randomItems.value.map((i) => i.userAnswer);
+	// 物品命名
+	formFields.value[0].value = randomItems.value.map((i) => i.standard);
+	formFields.value[0].userAnswer = randomItems.value.map((i) => i.userAnswer);
 
-	formFields.value[0].icons = icons;
-	formFields.value[0].value = standards;
-	formFields.value[0].answer = answers;
-	formFields.value[1].answer = repeatText.value;
+	// 句子复述：标准答案是随机句子
+	formFields.value[1].value = randomSentence.value;
+	formFields.value[1].userAnswer = repeatText.value;
 
-	emit('submit', {
-		language_ability: formFields.value
+	// 合并到全局 questions
+	const questions = props.form.questions || [];
+	formFields.value.forEach((item) => {
+		const idx = questions.findIndex((q) => q.key === item.key);
+		if (idx >= 0) {
+			questions[idx] = { ...questions[idx], ...item };
+		} else {
+			questions.push(item);
+		}
 	});
+
+	emit('submit', { questions });
 	emit('go', 'q7');
 };
 
@@ -218,25 +217,35 @@ const handleNext = () => {
 // 缓存恢复
 // ==========================
 const restoreCache = () => {
-	if (!props.form) return;
-	const data = props.form.language_ability || [];
-	if (data.length >= 1) {
-		const { icons, value, answer } = data[0];
-		if (icons && value && answer && icons.length === value.length && value.length === answer.length) {
-			randomItems.value = icons.map((ic, i) => ({
-				icon: ic,
-				standard: value[i],
-				userAnswer: answer[i]
-			}));
-		}
+	if (!props.form?.questions) return;
+	const questions = props.form.questions;
+
+	formFields.value.forEach((field) => {
+		const target = questions.find((q) => q.key === field.key);
+		if (target) Object.assign(field, target);
+	});
+
+	// 恢复物品
+	const naming = formFields.value[0];
+	if (naming.value?.length) {
+		randomItems.value = naming.value.map((standard, i) => ({
+			icon: allItemPool.value.find((item) => item.standard === standard)?.icon || '❓',
+			standard,
+			userAnswer: naming.userAnswer[i] || ''
+		}));
 	}
-	if (data.length >= 2) {
-		repeatText.value = data[1].answer || '';
+
+	// 恢复复述句子和用户答案
+	const repeat = formFields.value[1];
+	if (repeat.value) {
+		randomSentence.value = repeat.value;
 	}
+	repeatText.value = repeat.userAnswer || '';
 };
 
 onMounted(() => {
 	pickRandomItems();
+	pickRandomSentence();
 	restoreCache();
 });
 

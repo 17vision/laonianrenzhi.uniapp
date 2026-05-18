@@ -50,7 +50,7 @@ const formFields = ref([
 		options: [],
 		index: 0,
 		compare_type: CompareType.Equal,
-		answer: '',
+		value: '',
 		module: 'time_perception',
 		module_name: '时间定向力',
 		userAnswer: ''
@@ -65,7 +65,7 @@ const formFields = ref([
 		options: [],
 		index: 0,
 		compare_type: CompareType.Equal,
-		answer: '',
+		value: '',
 		module: 'time_perception',
 		module_name: '时间定向力',
 		userAnswer: ''
@@ -80,7 +80,7 @@ const formFields = ref([
 		options: [],
 		index: 0,
 		compare_type: CompareType.Equal,
-		answer: '',
+		value: '',
 		module: 'time_perception',
 		module_name: '时间定向力',
 		userAnswer: ''
@@ -95,7 +95,7 @@ const formFields = ref([
 		options: [],
 		index: 0,
 		compare_type: CompareType.Equal,
-		answer: '',
+		value: '',
 		module: 'time_perception',
 		module_name: '时间定向力',
 		userAnswer: ''
@@ -110,7 +110,7 @@ const formFields = ref([
 		options: [],
 		index: 0,
 		compare_type: CompareType.Equal,
-		answer: '',
+		value: '',
 		module: 'time_perception',
 		module_name: '时间定向力',
 		userAnswer: ''
@@ -147,19 +147,19 @@ const initOptions = () => {
 
 	yf.options = ['请选择'];
 	for (let i = currentYear - 10; i <= currentYear + 10; i++) yf.options.push(i + '年');
-	yf.answer = `${currentYear}年`;
+	yf.value = `${currentYear}年`;
 
 	mf.options = ['请选择', ...Array.from({ length: 12 }, (_, i) => `${i + 1}月`)];
-	mf.answer = `${currentMonth + 1}月`;
+	mf.value = `${currentMonth + 1}月`;
 
 	wf.options = ['请选择', '星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-	wf.answer = currentWeek;
+	wf.value = currentWeek;
 
 	sf.options = ['请选择', '春季', '夏季', '秋季', '冬季'];
-	sf.answer = getSeason();
+	sf.value = getSeason();
 
 	refreshDayList();
-	df.answer = String(currentDay);
+	df.value = String(currentDay);
 };
 
 // 刷新日期
@@ -219,7 +219,7 @@ const handleNext = () => {
 		type: f.type,
 		total_score: f.total_score,
 		compare_type: f.compare_type,
-		answer: f.answer, // 正确答案
+		value: f.value, // 正确答案
 		userAnswer: f.userAnswer, // 用户答案
 		module: f.module,
 		module_name: f.module_name

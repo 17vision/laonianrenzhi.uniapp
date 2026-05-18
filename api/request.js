@@ -15,13 +15,6 @@ function GetToken() {
 	return null;
 }
 
-function SetToken(token, expires_in) {
-	const expires_at = parseInt((new Date()).getTime() / 1000) + expires_in
-	uni.setStorageSync('token', {
-		token,
-		expires_at
-	})
-}
 
 function Header() {
 	const secret = "kN7hT7jU4aU2";
@@ -104,6 +97,5 @@ function Request(method, url, data, config = {}) {
 export {
 	Request,
 	BaseURL,
-	Header,
-	SetToken
+	Header
 }

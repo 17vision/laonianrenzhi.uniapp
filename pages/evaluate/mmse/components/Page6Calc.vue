@@ -18,7 +18,7 @@
 			<!-- 全部题目 + 序号 + 输入框 -->
 			<view class="item-list">
 				<view class="item" v-for="(item, idx) in calcSteps" :key="idx">
-					<view class="formula">{{ idx + 1 }}. {{ item.formula }}</view>
+					<view class="formula">第{{ idx + 1 }}题</view>
 					<input
 						v-model.number="userCalc[idx]"
 						class="input"
@@ -93,7 +93,7 @@ const question = ref({
 const questions = ref([]);
 
 // 状态
-const userCalc = ref([0, 0, 0, 0, 0]);
+const userCalc = ref(['', '', '', '', '']);
 const calcCountdownText = ref('30 秒');
 const showNext = ref(false);
 const timeEndDisabled = ref(false);

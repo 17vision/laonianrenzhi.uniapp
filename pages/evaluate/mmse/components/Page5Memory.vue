@@ -131,7 +131,7 @@ const shuffleArr = (arr) => {
 // ======================
 const initRandomList = () => {
 	const shuffled = shuffleArr(memoryList);
-	const selectThree = shuffled.slice(0, 3).map(i => i.name);
+	const selectThree = shuffled.slice(0, 3).map((i) => i.name);
 	randomMemory.value = selectThree;
 	formFields.value[0].value = selectThree;
 };
@@ -143,7 +143,7 @@ const initFromQuestions = () => {
 	if (!props.form?.questions) return;
 	questions.value = props.form.questions;
 
-	const target = questions.value.find(q => q.key === 'memory_items');
+	const target = questions.value.find((q) => q.key === 'memory_items');
 	if (target) {
 		formFields.value[0].value = target.value || [];
 		randomMemory.value = target.value || [];
@@ -214,7 +214,7 @@ const handleNext = () => {
 		module_name: field.module_name
 	};
 
-	const idx = questions.value.findIndex(q => q.key === item.key);
+	const idx = questions.value.findIndex((q) => q.key === item.key);
 	if (idx >= 0) questions.value[idx] = item;
 	else questions.value.push(item);
 
@@ -231,7 +231,11 @@ onMounted(() => {
 
 onUnmounted(() => clearInterval(timer));
 
-watch(() => props.form, () => initFromQuestions(), { deep: true });
+watch(
+	() => props.form,
+	() => initFromQuestions(),
+	{ deep: true }
+);
 </script>
 
 <style lang="scss" scoped>

@@ -65,6 +65,35 @@ const sqsignRef = ref(null);
 const sentenceInput = ref('');
 
 // ==========================
+// ✅ 统一题目结构（100%对齐questions）
+// ==========================
+const formFields = ref([
+	{
+		key: 'write_sentence',
+		label: '书写完整句子',
+		type: 'write',
+		compare_type: CompareType.Exclude,
+		value: '主语+动词，完整语句',
+		total_score: 2,
+		userAnswer: '',
+		module: 'write_ability',
+		module_name: '书写与绘图能力'
+	},
+	{
+		key: 'draw_shape',
+		label: '手绘几何图形',
+		type: 'draw',
+		compare_type: CompareType.Exclude,
+		total_score: 3,
+		value: [], // 图形标准名称
+		userAnswer: '', // 手绘图片地址
+		shapes: [], // 图形符号
+		module: 'write_ability',
+		module_name: '书写与绘图能力'
+	}
+]);
+
+// ==========================
 // 随机图形
 // ==========================
 const pickRandomShapes = () => {
@@ -77,73 +106,32 @@ const pickRandomShapes = () => {
 };
 
 // ==========================
-// 表单结构
-// ==========================
-const formFields = ref([
-	{
-		key: 'write_sentence',
-		label: '书写完整句子',
-		type: 'write',
-		compare_type: CompareType.Exclude,
-		value: '主语+动词，完整语句',
-		total_score: 2,
-		score: 0,
-		prompt: '判断用户输入的是否为一句完整、有意义的话，必须包含主语和动词，语句通顺合理即可',
-		answer: '',
-		module: 'write_ability',
-		module_name: '书写与绘图能力'
-	},
-	{
-		key: 'draw_shape',
-		label: '手绘几何图形',
-		type: 'draw',
-		compare_type: CompareType.Exclude,
-		total_score: 3,
-		score: 0,
-		shapes: [],
-		value: [],
-		prompt: '根据展示的几何图形，判断用户是否手绘完成，形状大致相似、结构正确即可得分',
-		answer: '',
-		module: 'write_ability',
-		module_name: '书写与绘图能力'
-	}
-]);
-
-// ==========================
-// ✅【核心】加载缓存并回显所有内容
+// ✅ 从 questions 恢复缓存
 // ==========================
 const loadCache = async () => {
-	if (!props.form || !props.form.write_ability) return;
+	if (!props.form?.questions) return;
+	const questions = props.form.questions;
 
-	const writeData = props.form.write_ability;
+	formFields.value.forEach((field) => {
+		const target = questions.find((q) => q.key === field.key);
+		if (target) Object.assign(field, target);
+	});
 
-	// 1. 回显句子
-	const writeSentence = writeData.find((v) => v.key === 'write_sentence');
-	if (writeSentence) {
-		sentenceInput.value = writeSentence.answer || '';
-		formFields.value[0].answer = writeSentence.answer || '';
-	}
+	// 回显句子
+	sentenceInput.value = formFields.value[0].userAnswer || '';
 
-	// 2. 回显图形 + 手绘图片
-	const drawShape = writeData.find((v) => v.key === 'draw_shape');
-	if (drawShape) {
-		// 图形回显
-		if (drawShape.shapes && drawShape.value) {
-			randomShapes.value = drawShape.shapes.map((s, i) => ({
-				shape: s,
-				standard: drawShape.value[i]
-			}));
-		}
-
-		// 同步到表单
-		formFields.value[1].shapes = drawShape.shapes || [];
-		formFields.value[1].value = drawShape.value || [];
-		formFields.value[1].answer = drawShape.answer || '';
+	// 回显图形
+	const draw = formFields.value[1];
+	if (draw.value?.length) {
+		randomShapes.value = draw.value.map((standard, i) => ({
+			shape: draw.shapes[i] || '',
+			standard
+		}));
 	}
 };
 
 // ==========================
-// 提交
+// 校验
 // ==========================
 const validateAll = () => {
 	if (!sentenceInput.value.trim()) {
@@ -153,6 +141,9 @@ const validateAll = () => {
 	return true;
 };
 
+// ==========================
+// ✅ 提交到 questions
+// ==========================
 const handleFinish = async () => {
 	if (!validateAll()) return;
 
@@ -182,19 +173,28 @@ const handleFinish = async () => {
 			return;
 		}
 
-		// 3. 组装数据
+		// 3. 赋值答案
+		formFields.value[0].userAnswer = sentenceInput.value;
+
 		const shapeList = randomShapes.value.map((i) => i.shape);
 		const standardList = randomShapes.value.map((i) => i.standard);
-
-		formFields.value[0].answer = sentenceInput.value;
 		formFields.value[1].shapes = shapeList;
 		formFields.value[1].value = standardList;
-		formFields.value[1].answer = uploadRes.url;
+		formFields.value[1].userAnswer = uploadRes.url;
 
-		// 4. 提交
-		emit('submit', {
-			write_ability: formFields.value
+		// 4. 合并到全局 questions
+		const questions = props.form.questions || [];
+		formFields.value.forEach((item) => {
+			const idx = questions.findIndex((q) => q.key === item.key);
+			if (idx >= 0) {
+				questions[idx] = { ...questions[idx], ...item };
+			} else {
+				questions.push(item);
+			}
 		});
+
+		// 5. 提交
+		emit('submit', { questions });
 		emit('go', 'result');
 		emit('save');
 	} catch (err) {
@@ -213,13 +213,7 @@ onMounted(() => {
 	loadCache();
 });
 
-watch(
-	() => props.form,
-	() => {
-		loadCache();
-	},
-	{ deep: true }
-);
+watch(() => props.form, loadCache, { deep: true });
 </script>
 
 <style lang="scss" scoped>
@@ -254,6 +248,7 @@ watch(
 	background: #fff;
 	border-radius: 20rpx;
 	padding: 26rpx;
+	margin: 20rpx 0;
 }
 .input-textarea {
 	width: 100%;

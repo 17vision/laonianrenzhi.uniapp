@@ -1,9 +1,6 @@
 import {
 	defineStore
 } from 'pinia'
-import {
-	SetToken
-} from '../api/request';
 
 const fillable = ['uid', 'nickname', 'avatar', 'gender', 'token']
 
@@ -16,18 +13,15 @@ const useUser = defineStore('user', {
 		nickname: uni.getStorageSync('nickname', ''),
 		loginAt: uni.getStorageSync('loginAt') || 0,
 		info: uni.getStorageSync('info') || {},
+		token: uni.getStorageSync('token') || null,
 	}),
 	getters: {
 		logined: (state) => {
-			const token = uni.getStorageSync('token')
-			if (token) {
-				const now = (new Date()).getTime() / 1000
-				if (token.expires_at > now) {
-					return true
-				}
-			}
+			if (!state.token) return false
 
-			return false
+			const now = Math.floor(Date.now() / 1000)
+
+			return state.token.expires_at > now
 		},
 		getInfo: (state) => {
 			return state.info
@@ -35,7 +29,12 @@ const useUser = defineStore('user', {
 	},
 	actions: {
 		setToken(token, expires_in) {
-			SetToken(token, expires_in)
+			const expires_at = parseInt((new Date()).getTime() / 1000) + expires_in
+			this.token = {
+				token,
+				expires_at
+			}
+			uni.setStorageSync('token', this.token)
 		},
 		setObject(value) {
 			if (value && typeof value == 'object') {
