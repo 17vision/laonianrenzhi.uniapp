@@ -152,518 +152,568 @@
 		<!-- 未登录 -->
 		<block v-else>
 			<view class="unlogin-card">
-				<view class="unlogin-avatar">👤</view>
-				<view class="unlogin-tip">登录后查看个人健康数据、训练记录与专属服务</view>
+				<image class="avatar" src="/static/image/mine/avatar.png" mode="widthFix"></image>
+				<view class="tip-1">Hi,欢迎开启个人认知训练</view>
+				<view class="tip-2">登录后可查看个人康复训练数据</view>
+
+				<view class="fun-list">
+					<view class="fun-item">
+						<image src="/static/image/mine/renzhi-shaicha.png" mode="widthFix"></image>
+						<text>认知筛查</text>
+					</view>
+					<view class="fun-item">
+						<image src="/static/image/mine/kangfu-xunlian.png" mode="widthFix"></image>
+						<text>康复训练</text>
+					</view>
+					<view class="fun-item">
+						<image src="/static/image/mine/zhuanshu-fuwu.png" mode="widthFix"></image>
+						<text>专属服务</text>
+					</view>
+				</view>
+
 				<view class="login-btn" @tap="goLogin">立即登录</view>
+				
+				<text class="tip-4">登录即代表同意《用户服务协议》与《隐私政策》</text>
 			</view>
 		</block>
 	</scroll-view>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { onShow, onPullDownRefresh } from '@dcloudio/uni-app';
-import { useUser } from '@/store/user.js';
-import { GetUserinfo } from '@/api/fly.js';
+	import { ref, computed } from 'vue';
+	import { onShow, onPullDownRefresh } from '@dcloudio/uni-app';
+	import { useUser } from '@/store/user.js';
+	import { GetUserinfo } from '@/api/fly.js';
 
-const userStore = useUser();
+	const userStore = useUser();
 
-// 用户信息
-const userInfo = ref({});
+	// 用户信息
+	const userInfo = ref({});
 
-// 康复数据
-const rehabData = ref({
-	trainCount: 28,
-	totalHour: 7.5,
-	continueDay: 5
-});
+	// 康复数据
+	const rehabData = ref({
+		trainCount: 28,
+		totalHour: 7.5,
+		continueDay: 5
+	});
 
-// 本周打卡
-const weekDays = ref([
-	{ name: '日', done: false, disabled: false },
-	{ name: '一', done: true, disabled: false },
-	{ name: '二', done: true, disabled: false },
-	{ name: '三', done: true, disabled: false },
-	{ name: '四', done: false, disabled: true },
-	{ name: '五', done: true, disabled: false },
-	{ name: '六', done: false, disabled: true }
-]);
+	// 本周打卡
+	const weekDays = ref([
+		{ name: '日', done: false, disabled: false },
+		{ name: '一', done: true, disabled: false },
+		{ name: '二', done: true, disabled: false },
+		{ name: '三', done: true, disabled: false },
+		{ name: '四', done: false, disabled: true },
+		{ name: '五', done: true, disabled: false },
+		{ name: '六', done: false, disabled: true }
+	]);
 
-const weekFinish = computed(() => {
-	const cnt = weekDays.value.filter((i) => i.done).length;
-	return `${cnt}/7`;
-});
+	const weekFinish = computed(() => {
+		const cnt = weekDays.value.filter((i) => i.done).length;
+		return `${cnt}/7`;
+	});
 
-// 取第一个字（姓）+ 先生/女士，兜底昵称
-// 取第一个字（姓）+ 先生/女士，兜底昵称 【正确可用版】
-const showName = computed(() => {
-	const user = userInfo.value || {};
-	const patient = user.patient || {};
+	// 取第一个字（姓）+ 先生/女士，兜底昵称
+	// 取第一个字（姓）+ 先生/女士，兜底昵称 【正确可用版】
+	const showName = computed(() => {
+		const user = userInfo.value || {};
+		const patient = user.patient || {};
 
-	const fullName = patient.username || user.nickname || '';
-	const firstName = fullName.charAt(0) || '';
-	const suffix = user.gender === 1 ? '先生' : '女士';
+		const fullName = patient.username || user.nickname || '';
+		const firstName = fullName.charAt(0) || '';
+		const suffix = user.gender === 1 ? '先生' : '女士';
 
-	return patient.username ? `${firstName}${suffix}` : firstName;
-});
+		return patient.username ? `${firstName}${suffix}` : firstName;
+	});
 
-// 勋章
-const medals = ref([
-	{ icon: '⭐', name: '初次训练', desc: '完成第一次训练', locked: false },
-	{ icon: '🔥', name: '连战三天', desc: '连续训练3天', locked: false },
-	{ icon: '🏅', name: '一周坚持', desc: '连续训练7天', locked: false },
-	{ icon: '💎', name: '十次达成', desc: '累计完成10次训练', locked: false },
-	{ icon: '👑', name: '百次大师', desc: '累计完成100次训练', locked: true },
-	{ icon: '🌟', name: '满分之星', desc: '正确率100%', locked: true }
-]);
+	// 勋章
+	const medals = ref([
+		{ icon: '⭐', name: '初次训练', desc: '完成第一次训练', locked: false },
+		{ icon: '🔥', name: '连战三天', desc: '连续训练3天', locked: false },
+		{ icon: '🏅', name: '一周坚持', desc: '连续训练7天', locked: false },
+		{ icon: '💎', name: '十次达成', desc: '累计完成10次训练', locked: false },
+		{ icon: '👑', name: '百次大师', desc: '累计完成100次训练', locked: true },
+		{ icon: '🌟', name: '满分之星', desc: '正确率100%', locked: true }
+	]);
 
-// 动态
-const activities = ref([
-	{ title: '完成「时光厨房」训练', desc: '正确率92% · L2', time: '今天 09:30' },
-	{ title: '完成「星光连线」训练', desc: '正确率88% · L2', time: '4月25日' }
-]);
+	// 动态
+	const activities = ref([
+		{ title: '完成「时光厨房」训练', desc: '正确率92% · L2', time: '今天 09:30' },
+		{ title: '完成「星光连线」训练', desc: '正确率88% · L2', time: '4月25日' }
+	]);
 
-// 医护团队
-const teamList = ref([
-	{ avatar: '👨‍⚕️', name: '张伟 医生', title: '神经内科 · 主任医师' },
-	{ avatar: '👩‍⚕️', name: '赵静 护士', title: '神经内科 · 主管护师' }
-]);
+	// 医护团队
+	const teamList = ref([
+		{ avatar: '👨‍⚕️', name: '张伟 医生', title: '神经内科 · 主任医师' },
+		{ avatar: '👩‍⚕️', name: '赵静 护士', title: '神经内科 · 主管护师' }
+	]);
 
-// 设置
-const settings = ref([
-	{ icon: '🔤', name: '字体大小', value: '大', statusClass: '' },
-	{ icon: '🔊', name: '语音播报', value: '已开启', statusClass: 'on' },
-	{ icon: '📱', name: '极简模式', value: '已关闭', statusClass: 'off' }
-]);
+	// 设置
+	const settings = ref([
+		{ icon: '🔤', name: '字体大小', value: '大', statusClass: '' },
+		{ icon: '🔊', name: '语音播报', value: '已开启', statusClass: 'on' },
+		{ icon: '📱', name: '极简模式', value: '已关闭', statusClass: 'off' }
+	]);
 
-// 图表
-const opts = ref({
-	color: ['#6366F1'],
-	padding: [15, 15, 0, 5],
-	enableScroll: false,
-	legend: { show: false },
-	xAxis: { disableGrid: true },
-	yAxis: [{ min: 0 }],
-	extra: {
-		line: {
-			type: 'straight',
-			width: 3,
-			activeType: 'hollow',
-			activeColor: '#6366F1'
-		}
-	}
-});
-
-const chartData = ref({
-	categories: ['1月', '2月', '3月', '4月'],
-	series: [{ name: '评估分数', data: [35, 36, 31, 33] }]
-});
-
-// ==========================
-// 方法
-// ==========================
-
-// 获取用户信息
-const getUserInfo = async () => {
-	if (!userStore.logined) return;
-	try {
-		const res = await GetUserinfo();
-		if (res) {
-			userInfo.value = res;
-			userStore.setInfo(res.patient);
-		}
-	} catch (e) {
-		console.error('获取用户信息失败', e);
-	}
-};
-
-// 退出登录
-const handleLogout = () => {
-	uni.showModal({
-		title: '确认退出',
-		content: '确定要退出登录吗？',
-		success: (res) => {
-			if (res.confirm) {
-				userStore.logout();
-				uni.showToast({ title: '已退出登录', icon: 'success' });
+	// 图表
+	const opts = ref({
+		color: ['#6366F1'],
+		padding: [15, 15, 0, 5],
+		enableScroll: false,
+		legend: { show: false },
+		xAxis: { disableGrid: true },
+		yAxis: [{ min: 0 }],
+		extra: {
+			line: {
+				type: 'straight',
+				width: 3,
+				activeType: 'hollow',
+				activeColor: '#6366F1'
 			}
 		}
 	});
-};
 
-// 跳转
-const goLogin = () => {
-	uni.navigateTo({ url: '/pages/login/login' });
-};
+	const chartData = ref({
+		categories: ['1月', '2月', '3月', '4月'],
+		series: [{ name: '评估分数', data: [35, 36, 31, 33] }]
+	});
 
-const goPatients = () => {
-	uni.navigateTo({ url: '/pages/mine/part/patients' });
-};
+	// ==========================
+	// 方法
+	// ==========================
 
-// 生命周期
-onPullDownRefresh(async () => {
-	await getUserInfo();
-	uni.stopPullDownRefresh();
-});
+	// 获取用户信息
+	const getUserInfo = async () => {
+		if (!userStore.logined) return;
+		try {
+			const res = await GetUserinfo();
+			if (res) {
+				userInfo.value = res;
+				userStore.setInfo(res.patient);
+			}
+		} catch (e) {
+			console.error('获取用户信息失败', e);
+		}
+	};
 
-onShow(() => {
-	getUserInfo();
-});
+	// 退出登录
+	const handleLogout = () => {
+		uni.showModal({
+			title: '确认退出',
+			content: '确定要退出登录吗？',
+			success: (res) => {
+				if (res.confirm) {
+					userStore.logout();
+					uni.showToast({ title: '已退出登录', icon: 'success' });
+				}
+			}
+		});
+	};
+
+	// 跳转
+	const goLogin = () => {
+		uni.navigateTo({ url: '/pages/login/login' });
+	};
+
+	const goPatients = () => {
+		uni.navigateTo({ url: '/pages/mine/part/patients' });
+	};
+
+	// 生命周期
+	onPullDownRefresh(async () => {
+		await getUserInfo();
+		uni.stopPullDownRefresh();
+	});
+
+	onShow(() => {
+		getUserInfo();
+	});
 </script>
 
 <style scoped lang="scss">
-.profile-page {
-	padding: 30rpx;
-	background: #fff8f2;
-	min-height: 100vh;
-	box-sizing: border-box;
-}
-
-.section {
-	margin-bottom: 36rpx;
-}
-
-.section-title {
-	display: flex;
-	align-items: center;
-	font-size: 34rpx;
-	font-weight: 600;
-	color: #1e293b;
-	margin-bottom: 20rpx;
-}
-
-.section-title .icon {
-	margin-right: 12rpx;
-	font-size: 36rpx;
-}
-
-/* 用户卡片 */
-.user-card {
-	background: linear-gradient(180deg, #eaf5ff 0%, #fff 100%);
-	border-radius: 28rpx;
-	padding: 48rpx 32rpx;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin-bottom: 40rpx;
-	box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
-}
-
-.avatar {
-	width: 120rpx;
-	height: 120rpx;
-	border-radius: 50%;
-	overflow: hidden;
-	margin-bottom: 20rpx;
-
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
+	.profile-page {
+		padding: 30rpx;
+		background: #fff8f2;
+		min-height: 100vh;
+		box-sizing: border-box;
 	}
-}
 
-.user-name {
-	font-size: 46rpx;
-	font-weight: bold;
-	color: #1e293b;
-	margin-bottom: 12rpx;
-}
+	.section {
+		margin-bottom: 36rpx;
+	}
 
-.user-status {
-	font-size: 30rpx;
-	color: #475569;
-	margin-bottom: 8rpx;
-}
+	.section-title {
+		display: flex;
+		align-items: center;
+		font-size: 34rpx;
+		font-weight: 600;
+		color: #1e293b;
+		margin-bottom: 20rpx;
+	}
 
-.risk-tag.low {
-	color: #059669;
-	font-weight: 500;
-}
+	.section-title .icon {
+		margin-right: 12rpx;
+		font-size: 36rpx;
+	}
 
-.user-info {
-	font-size: 28rpx;
-	color: #94a3b8;
-}
+	/* 用户卡片 */
+	.user-card {
+		background: linear-gradient(180deg, #eaf5ff 0%, #fff 100%);
+		border-radius: 28rpx;
+		padding: 48rpx 32rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 40rpx;
+		box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
+	}
 
-.warning {
-	color: #d97706;
-}
+	.avatar {
+		width: 120rpx;
+		height: 120rpx;
+		border-radius: 50%;
+		overflow: hidden;
+		margin-bottom: 20rpx;
 
-/* 未登录 */
-.unlogin-card {
-	background: #fff;
-	border-radius: 28rpx;
-	padding: 60rpx 40rpx;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin-bottom: 40rpx;
-	box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
-}
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
 
-.unlogin-avatar {
-	font-size: 120rpx;
-	color: #cbd5e1;
-	margin-bottom: 24rpx;
-}
+	.user-name {
+		font-size: 46rpx;
+		font-weight: bold;
+		color: #1e293b;
+		margin-bottom: 12rpx;
+	}
 
-.unlogin-tip {
-	font-size: 28rpx;
-	color: #64748b;
-	text-align: center;
-	line-height: 1.6;
-	margin-bottom: 36rpx;
-}
+	.user-status {
+		font-size: 30rpx;
+		color: #475569;
+		margin-bottom: 8rpx;
+	}
 
-.login-btn {
-	width: 240rpx;
-	height: 80rpx;
-	background: #6366f1;
-	color: #fff;
-	border-radius: 40rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 32rpx;
-}
+	.risk-tag.low {
+		color: #059669;
+		font-weight: 500;
+	}
 
-/* 统计卡片 */
-.stats-card {
-	background: #fff;
-	border-radius: 28rpx;
-	padding: 40rpx 32rpx;
-	display: flex;
-	justify-content: space-around;
-	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
-}
+	.user-info {
+		font-size: 28rpx;
+		color: #94a3b8;
+	}
 
-.stat-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
+	.warning {
+		color: #d97706;
+	}
 
-.stat-value {
-	font-size: 58rpx;
-	font-weight: 700;
-}
+	/* 未登录 */
+	.unlogin-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 
-.stat-value.blue {
-	color: #2563eb;
-}
+		.avatar {
+			width: 298rpx;
+			margin-top: 58rpx;
+		}
 
-.stat-value.green {
-	color: #059669;
-}
+		.tip-1 {
+			font-size: 36rpx;
+			color: #431407;
+			margin-top: 14rpx;
+		}
 
-.stat-value.orange {
-	color: #d97706;
-}
+		.tip-2 {
+			font-size: 26rpx;
+			color: #B46347;
+			margin-top: 18rpx;
+		}
 
-.stat-label {
-	font-size: 28rpx;
-	color: #64748b;
-	margin-top: 8rpx;
-}
+		.fun-list {
+			display: flex;
+			gap: 30rpx;
+			margin-top: 62rpx;
 
-.stat-divider {
-	width: 1rpx;
-	background: #e2e8f0;
-}
+			.fun-item {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
 
-/* 星期打卡 */
-.week-card {
-	background: #fff;
-	border-radius: 28rpx;
-	padding: 40rpx 32rpx;
-	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
-}
+				image {
+					width: 98rpx;
+					height: 98rpx;
+				}
 
-.day-list {
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-}
+				text {
+					color: #8D4228;
+					font-size: 22rpx;
+					margin-top: 10rpx;
+				}
+			}
+		}
 
-.day-item {
-	flex: 1;
-	align-items: center;
-	display: flex;
-	flex-direction: column;
-}
+		.login-btn {
+			width: 100%;
+			height: 87rpx;
+			margin-top: 70rpx;
+			background: linear-gradient(135deg, #FB923C, #EA580C);
+			color: #fff;
+			box-shadow: 0 7rpx 7rpx rgba(255, 140, 24, 0.50);
+			border-radius: 43rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 34rpx;
+		}
+		
+		.tip-4 {
+			color: #9A3412;
+			opacity: 0.5;
+			font-size: 22rpx;
+			margin-top: 12rpx;
+		}
+	}
 
-.day-name {
-	font-size: 26rpx;
-	color: #64748b;
-	margin-bottom: 12rpx;
-}
 
-.day-check {
-	width: 60rpx;
-	height: 60rpx;
-	border-radius: 50%;
-	border: 3rpx solid #e2e8f0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 28rpx;
-	color: #94a3b8;
-}
+	/* 统计卡片 */
+	.stats-card {
+		background: #fff;
+		border-radius: 28rpx;
+		padding: 40rpx 32rpx;
+		display: flex;
+		justify-content: space-around;
+		box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+	}
 
-.day-check.done {
-	background: #059669;
-	border-color: #059669;
-	color: #fff;
-}
+	.stat-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
 
-.week-summary {
-	text-align: center;
-	font-size: 28rpx;
-	color: #94a3b8;
-}
+	.stat-value {
+		font-size: 58rpx;
+		font-weight: 700;
+	}
 
-/* 图表 */
-.chart-box {
-	background: #fff;
-	border-radius: 28rpx;
-	padding: 20rpx;
-	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
-	height: 380rpx;
-}
+	.stat-value.blue {
+		color: #2563eb;
+	}
 
-/* 勋章 */
-.medal-card {
-	background: #fff;
-	border-radius: 28rpx;
-	padding: 40rpx 32rpx;
-	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
-}
+	.stat-value.green {
+		color: #059669;
+	}
 
-.medal-grid {
-	display: flex;
-	flex-wrap: wrap;
-}
+	.stat-value.orange {
+		color: #d97706;
+	}
 
-.medal-item {
-	width: 33.33%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin-bottom: 32rpx;
-}
+	.stat-label {
+		font-size: 28rpx;
+		color: #64748b;
+		margin-top: 8rpx;
+	}
 
-.medal-icon {
-	width: 84rpx;
-	height: 84rpx;
-	border-radius: 50%;
-	background: #f8fafc;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 48rpx;
-	position: relative;
-}
+	.stat-divider {
+		width: 1rpx;
+		background: #e2e8f0;
+	}
 
-.medal-icon.locked {
-	opacity: 0.4;
-}
+	/* 星期打卡 */
+	.week-card {
+		background: #fff;
+		border-radius: 28rpx;
+		padding: 40rpx 32rpx;
+		box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+	}
 
-.lock {
-	position: absolute;
-	font-size: 28rpx;
-}
+	.day-list {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 28rpx;
+	}
 
-.medal-name {
-	font-size: 28rpx;
-	color: #1e293b;
-	margin-top: 8rpx;
-	text-align: center;
-}
+	.day-item {
+		flex: 1;
+		align-items: center;
+		display: flex;
+		flex-direction: column;
+	}
 
-.medal-desc {
-	font-size: 24rpx;
-	color: #64748b;
-	text-align: center;
-}
+	.day-name {
+		font-size: 26rpx;
+		color: #64748b;
+		margin-bottom: 12rpx;
+	}
 
-/* 列表样式 */
-.list-card {
-	background: #fff;
-	border-radius: 28rpx;
-	overflow: hidden;
-	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
-}
+	.day-check {
+		width: 60rpx;
+		height: 60rpx;
+		border-radius: 50%;
+		border: 3rpx solid #e2e8f0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28rpx;
+		color: #94a3b8;
+	}
 
-.list-item {
-	display: flex;
-	align-items: center;
-	padding: 36rpx 32rpx;
-	border-bottom: 1rpx solid #f1f5f9;
-}
+	.day-check.done {
+		background: #059669;
+		border-color: #059669;
+		color: #fff;
+	}
 
-.list-item:last-child {
-	border-bottom: none;
-}
+	.week-summary {
+		text-align: center;
+		font-size: 28rpx;
+		color: #94a3b8;
+	}
 
-.item-icon {
-	font-size: 40rpx;
-	margin-right: 24rpx;
-}
+	/* 图表 */
+	.chart-box {
+		background: #fff;
+		border-radius: 28rpx;
+		padding: 20rpx;
+		box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+		height: 380rpx;
+	}
 
-.item-avatar {
-	width: 72rpx;
-	height: 72rpx;
-	border-radius: 50%;
-	background: #eff6ff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 36rpx;
-	margin-right: 24rpx;
-}
+	/* 勋章 */
+	.medal-card {
+		background: #fff;
+		border-radius: 28rpx;
+		padding: 40rpx 32rpx;
+		box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+	}
 
-.item-content {
-	flex: 1;
-}
+	.medal-grid {
+		display: flex;
+		flex-wrap: wrap;
+	}
 
-.item-title {
-	font-size: 32rpx;
-	color: #1e293b;
-	margin-bottom: 6rpx;
-}
+	.medal-item {
+		width: 33.33%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-bottom: 32rpx;
+	}
 
-.item-desc {
-	font-size: 26rpx;
-	color: #64748b;
-}
+	.medal-icon {
+		width: 84rpx;
+		height: 84rpx;
+		border-radius: 50%;
+		background: #f8fafc;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 48rpx;
+		position: relative;
+	}
 
-.item-time {
-	font-size: 26rpx;
-	color: #94a3b8;
-}
+	.medal-icon.locked {
+		opacity: 0.4;
+	}
 
-.item-value {
-	font-size: 30rpx;
-	color: #94a3b8;
-}
+	.lock {
+		position: absolute;
+		font-size: 28rpx;
+	}
 
-.item-value.on {
-	color: #059669;
-}
+	.medal-name {
+		font-size: 28rpx;
+		color: #1e293b;
+		margin-top: 8rpx;
+		text-align: center;
+	}
 
-/* 退出按钮 */
-.logout-btn {
-	background: #fff;
-	color: #dc2626;
-	border: 2rpx solid #dc2626;
-	border-radius: 28rpx;
-	height: 96rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 34rpx;
-	font-weight: 600;
-	margin-top: 30rpx;
-}
+	.medal-desc {
+		font-size: 24rpx;
+		color: #64748b;
+		text-align: center;
+	}
+
+	/* 列表样式 */
+	.list-card {
+		background: #fff;
+		border-radius: 28rpx;
+		overflow: hidden;
+		box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+	}
+
+	.list-item {
+		display: flex;
+		align-items: center;
+		padding: 36rpx 32rpx;
+		border-bottom: 1rpx solid #f1f5f9;
+	}
+
+	.list-item:last-child {
+		border-bottom: none;
+	}
+
+	.item-icon {
+		font-size: 40rpx;
+		margin-right: 24rpx;
+	}
+
+	.item-avatar {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		background: #eff6ff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 36rpx;
+		margin-right: 24rpx;
+	}
+
+	.item-content {
+		flex: 1;
+	}
+
+	.item-title {
+		font-size: 32rpx;
+		color: #1e293b;
+		margin-bottom: 6rpx;
+	}
+
+	.item-desc {
+		font-size: 26rpx;
+		color: #64748b;
+	}
+
+	.item-time {
+		font-size: 26rpx;
+		color: #94a3b8;
+	}
+
+	.item-value {
+		font-size: 30rpx;
+		color: #94a3b8;
+	}
+
+	.item-value.on {
+		color: #059669;
+	}
+
+	/* 退出按钮 */
+	.logout-btn {
+		background: #fff;
+		color: #dc2626;
+		border: 2rpx solid #dc2626;
+		border-radius: 28rpx;
+		height: 96rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 34rpx;
+		font-weight: 600;
+		margin-top: 30rpx;
+	}
 </style>

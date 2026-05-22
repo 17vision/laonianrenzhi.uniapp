@@ -20,5 +20,7 @@ page,
 	flex-direction: column;
 	width: 750upx;
 	min-height: 100vh;
+	box-sizing: border-box;
+	background-color: #FFF8F2;
 }
 </style>

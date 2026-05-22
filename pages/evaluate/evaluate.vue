@@ -1,5 +1,5 @@
 <template>
-	<view class="evaluate-page">
+	<view class="container evaluate-page">
 		<!-- loading -->
 		<view v-if="loading" class="loading-wrap">
 			<view class="loading-card" v-for="i in 3" :key="i"></view>
@@ -7,7 +7,7 @@
 
 		<template v-else>
 			<!-- 待完成 -->
-			<view v-if="pendingList.length">
+			<view v-if="pendingList.length" class="px-24 pt-30">
 				<view class="section-title">
 					<text>待完成评估</text>
 					<text class="section-count">{{ pendingList.length }}</text>
@@ -37,11 +37,14 @@
 					</view>
 				</view>
 			</view>
-
+		
 			<!-- 空状态 -->
-			<view class="empty-wrap" v-if="!pendingList.length && !historyList.length">
-				<!-- <image class="empty-img" src="/static/empty.png" mode="aspectFit" /> -->
-				<text class="empty-text">暂无评估记录</text>
+			<view class="empty-box" v-if="!pendingList.length && !historyList.length">
+				<image class="no-img" src="/static/image/evaluate/no-evaluate-record.png" mode="widthFix"></image>
+			
+				<view class="empty-title">暂无评估记录</view>
+			
+				<view class="empty-desc">查看是否有评估任务</view>
 			</view>
 
 			<!-- 历史记录 -->
@@ -137,12 +140,16 @@ const goDetail = (item) => {
 </script>
 
 <style lang="scss" scoped>
-.evaluate-page {
-	min-height: 100vh;
-	background: #f5f7fb;
-	padding: 24rpx;
-	box-sizing: border-box;
-}
+$color1: #754800;
+$color2: #A26B15;
+$color3: #333333;
+	
+// .evaluate-page {
+// 	min-height: 100vh;
+// 	background: #f5f7fb;
+// 	padding: 24rpx;
+// 	box-sizing: border-box;
+// }
 
 /* 区块标题 */
 .section-title {
@@ -305,26 +312,6 @@ const goDetail = (item) => {
 	color: #999;
 }
 
-/* 空状态 */
-.empty-wrap {
-	padding-top: 200rpx;
-
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.empty-img {
-	width: 280rpx;
-	height: 280rpx;
-	margin-bottom: 20rpx;
-}
-
-.empty-text {
-	font-size: 28rpx;
-	color: #999;
-}
-
 /* loading */
 .loading-card {
 	height: 220rpx;
@@ -333,4 +320,28 @@ const goDetail = (item) => {
 	margin-bottom: 24rpx;
 	opacity: 0.6;
 }
+
+.empty-box {
+		padding-top: 129rpx;
+
+		text-align: center;
+
+		.no-img {
+			width: 282rpx;
+			height: 282rpx;
+			margin-top: 46rpx;
+		}
+
+		.empty-title {
+			font-size: 38rpx;
+			font-weight: bold;
+			color: $color1;
+		}
+
+		.empty-desc {
+			font-size: 28rpx;
+			color: $color2;
+			margin-top: 11rpx;
+		}
+	}
 </style>
