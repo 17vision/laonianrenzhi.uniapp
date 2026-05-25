@@ -173,8 +173,7 @@ const useAudio = defineStore('audio', {
 			this._bindAudioEvents()
 
 			A.title = this.audioObj?.title || '音频'
-			A.epname = '音频'
-			A.singer = '课程'
+			A.singer = '暂无'
 			A.coverImgUrl =
 				this.audioObj?.background || ''
 
