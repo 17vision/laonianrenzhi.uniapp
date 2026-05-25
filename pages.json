@@ -66,6 +66,13 @@
 			"style": {
 				"navigationBarTitleText": "信息录入"
 			}
+		},
+		{
+			"path": "pages/guidance/part/play-page",
+			"style": {
+				"navigationBarTitleText": "详情",
+				"navigationStyle": "custom"
+			}
 		}
 
 	],
@@ -82,8 +89,7 @@
 		"fontSize": "18px",
 		"selectedColor": "#FF7D1E",
 		"color": "#BE966E",
-		"list": [
-			{
+		"list": [{
 				"pagePath": "pages/home/home",
 				"text": "首页",
 				"iconPath": "/static/image/tab/home.png",
