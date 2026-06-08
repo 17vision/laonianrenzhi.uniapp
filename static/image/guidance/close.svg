@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>关闭icon</title>
+    <g id="观吸空间" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="首页-删减版" transform="translate(-536.000000, -2365.000000)">
+            <g id="关闭icon" transform="translate(536.000000, 2365.000000)">
+                <circle id="椭圆形" fill-opacity="0" fill="#7B68EE" cx="30" cy="30" r="30"></circle>
+                <rect id="矩形" stroke="#7B68EE" stroke-width="3" x="14.5" y="15" width="31" height="31" rx="7"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

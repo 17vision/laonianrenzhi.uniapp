@@ -33,6 +33,25 @@
 			<text v-else-if="!hasMore && resources.length">没有更多了</text>
 		</view>
 	</view>
+	<view class="index-player" v-if="initAudio.getUrl">
+		<view class="dragBox">
+			<image @tap="goPlayPage" class="image" :src="initAudio.audioObj?.background" mode="aspectFill" />
+
+			<view class="title">
+				{{ initAudio.audioObj?.title }}
+			</view>
+		</view>
+
+		<view class="btn-box">
+			<image class="icon-btn" src="/static/image/guidance/close.svg" @tap="closedragFn" />
+
+			<view @tap="initAudio.togglePlay()">
+				<image v-if="initAudio.getIsPlaying" class="icon-btn" src="/static/image/guidance/play1.svg" />
+
+				<image v-else class="icon-btn" src="/static/image/guidance/pause1.svg" />
+			</view>
+		</view>
+	</view>
 
 	<view v-if="player && player.path" class="popup-box" @tap="hidePlayer">
 		<view style="text-align: center" @tap.stop="null">
@@ -47,7 +66,6 @@
 				autoplay
 				@loadedmetadata="videoReady"
 			></video>
-			<audio v-if="player.type === 2" class="audio" :src="player.path" :poster="player.cover" :name="player.name" :author="''" controls></audio>
 		</view>
 	</view>
 </template>
@@ -56,7 +74,9 @@
 import { reactive, ref, nextTick } from 'vue';
 import { onLoad, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app';
 import { Request } from '@/api/request.js';
+import { useAudio } from '@/store/audio.js';
 
+const initAudio = useAudio();
 const loading = ref(false);
 
 const hasMore = ref(true);
@@ -163,7 +183,16 @@ const switchTab = (group) => {
 function hidePlayer() {
 	player.value.path = '';
 }
+const goPlayPage = () => {
+	uni.navigateTo({
+		url: `/pages/guidance/part/play-page?id=${initAudio.audioObj?.chapter_id}&course_id=${initAudio.audioObj?.course_id}`
+	});
+};
 
+const closedragFn = () => {
+	initAudio.stop();
+	initAudio.reset();
+};
 onPullDownRefresh(async () => {
 	req.page = 1;
 	hasMore.value = true;
@@ -189,6 +218,49 @@ onReachBottom(() => {
 	min-height: 100vh;
 }
 
+.index-player {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 80rpx;
+	overflow: hidden;
+	display: flex;
+	padding: 0 30rpx;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #fff;
+	z-index: 100;
+	.dragBox {
+		display: flex;
+		align-items: center;
+		.image {
+			width: 50rpx;
+			height: 50rpx;
+			border-radius: 10rpx;
+		}
+		.title {
+			margin-left: 20rpx;
+			font-size: 28rpx;
+			color: #333;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			width: 300rpx;
+		}
+	}
+	.icon-btn {
+		width: 50rpx;
+		height: 50rpx;
+	}
+	.btn-box {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 140rpx;
+	}
+}
 .popup-box {
 	position: fixed;
 	left: 0;
@@ -351,5 +423,6 @@ onReachBottom(() => {
 	padding: 30rpx;
 	color: #999;
 	font-size: 24rpx;
+	margin-bottom: 50rpx;
 }
 </style>

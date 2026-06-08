@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="60px" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>暂停播放icon</title>
+    <g id="观吸空间" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="首页-删减版" transform="translate(-630.000000, -2444.000000)">
+            <g id="暂停播放icon" transform="translate(630.000000, 2444.000000)">
+                <circle id="椭圆形" fill="#EEEBFF" cx="30" cy="30" r="30"></circle>
+                <rect id="矩形" fill="#7B68EE" x="20" y="18" width="5" height="24" rx="2.5"></rect>
+                <rect id="矩形备份-4" fill="#7B68EE" x="35" y="18" width="5" height="24" rx="2.5"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

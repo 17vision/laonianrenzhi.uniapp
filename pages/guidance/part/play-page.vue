@@ -12,7 +12,9 @@
 				<image src="/static/image/guidance/icon-back.svg" mode=""></image>
 			</view>
 		</view>
-
+		<view class="content">
+			<view class="title">{{ initAudio.audioObj?.title }}</view>
+		</view>
 		<!-- 播放控制区域 -->
 		<view class="player-controls">
 			<view class="progress-bar">
@@ -28,19 +30,21 @@
 					@change="sliderChange"
 				/>
 			</view>
+
 			<view class="time-info">
 				<text>{{ formatSeconds(initAudio.currentTime) }}</text>
 				<text>{{ formatSeconds(initAudio.duration) }}</text>
 			</view>
+
 			<view class="control-buttons">
 				<view class=""></view>
 				<view class="btn-center">
-					<image class="btn-prev" src="/static/image/guidance/player-next.svg" @tap="initAudio.playPrev" mode=""></image>
+					<image class="btn-prev" src="/static/image/guidance/houtui5s.svg" @tap="initAudio.playPrev" mode=""></image>
 					<view class="btn-play-box" @tap="initAudio.togglePlay">
 						<image v-if="initAudio.getIsPlaying" src="/static/image/guidance/zanting.svg" mode=""></image>
 						<image v-else src="/static/image/guidance/bofang.svg" mode=""></image>
 					</view>
-					<image class="btn-next" src="/static/image/guidance/player-next.svg" @tap="initAudio.playNext" mode=""></image>
+					<image class="btn-next" src="/static/image/guidance/kuaijin5s.svg" @tap="initAudio.playNext" mode=""></image>
 				</view>
 				<view class=""></view>
 			</view>
@@ -130,26 +134,25 @@ const isVideoBg = computed(() => {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: calc(var(--status-bar-height) + 30upx) 40upx 0;
+		padding: calc(var(--status-bar-height) + 30rpx) 40rpx 0;
 		z-index: 3;
 
 		image {
-			margin-top: 20upx;
-			width: 80upx;
-			height: 80upx;
+			margin-top: 20rpx;
+			width: 80rpx;
+			height: 80rpx;
 		}
 	}
 
 	.content {
 		position: absolute;
-		padding: 0 40upx;
-		bottom: 380upx;
+		padding: 0 40rpx;
+		bottom: 380rpx;
 		z-index: 3;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
-		gap: 40upx;
-		height: 620upx;
+		gap: 40rpx;
 		width: 100%;
 		overflow: auto;
 
@@ -164,10 +167,10 @@ const isVideoBg = computed(() => {
 		}
 
 		.title {
-			font-size: 48upx;
+			font-size: 48rpx;
 			color: #fff;
 			font-weight: bold;
-			margin-bottom: 20upx;
+			margin-bottom: 20rpx;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			display: -webkit-box;
@@ -176,26 +179,26 @@ const isVideoBg = computed(() => {
 		}
 
 		image {
-			margin-top: 12upx;
+			margin-top: 12rpx;
 		}
 
 		.subtitle {
-			font-size: 32upx;
+			font-size: 32rpx;
 			color: rgba(255, 255, 255, 0.8);
 		}
 
 		.text {
-			margin: 12upx 0;
+			margin: 12rpx 0;
 			color: #fff;
 		}
 	}
 
 	.player-controls {
 		position: absolute;
-		bottom: 100upx;
+		bottom: 100rpx;
 		left: 0;
 		width: 100%;
-		padding: 0 40upx;
+		padding: 0 40rpx;
 		z-index: 3;
 
 		.progress-bar {
@@ -205,10 +208,10 @@ const isVideoBg = computed(() => {
 		.time-info {
 			display: flex;
 			justify-content: space-between;
-			margin-bottom: 60upx;
+			margin-bottom: 60rpx;
 
 			text {
-				font-size: 24upx;
+				font-size: 24rpx;
 				color: rgba(255, 255, 255, 0.8);
 			}
 		}
@@ -219,12 +222,12 @@ const isVideoBg = computed(() => {
 			align-items: center;
 
 			image {
-				width: 48upx;
-				height: 48upx;
+				width: 48rpx;
+				height: 48rpx;
 
 				&.btn-play {
-					width: 80upx;
-					height: 80upx;
+					width: 80rpx;
+					height: 80rpx;
 				}
 
 				&.active {
@@ -236,35 +239,34 @@ const isVideoBg = computed(() => {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				gap: 80upx;
+				gap: 80rpx;
 			}
 
 			.btn-play-box {
-				width: 90upx;
-				height: 90upx;
+				width: 90rpx;
+				height: 90rpx;
 				background: #fff;
-				border-radius: 25upx;
+				border-radius: 25rpx;
 				display: flex;
 				justify-content: center;
 				align-items: center;
 
 				image {
-					width: 40upx;
-					height: 40upx;
+					width: 40rpx;
+					height: 40rpx;
 				}
 			}
 
 			.btn-next {
-				transform: rotate(180deg);
 			}
 		}
 	}
 
 	.popup-box {
 		background-color: #fff;
-		border-radius: 30upx;
-		height: 500upx;
-		padding: 30upx 0;
+		border-radius: 30rpx;
+		height: 500rpx;
+		padding: 30rpx 0;
 
 		.list {
 			height: 100%;
@@ -275,7 +277,7 @@ const isVideoBg = computed(() => {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 24upx 40upx;
+			padding: 24rpx 40rpx;
 			border-bottom: 1px solid rgba(0, 100, 255, 0.08);
 			transition: all 0.2s ease;
 
@@ -283,13 +285,13 @@ const isVideoBg = computed(() => {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				margin: 20upx 0;
-				padding: 10upx 0;
+				margin: 20rpx 0;
+				padding: 10rpx 0;
 				transition: all 0.3s ease; // 交互时更顺滑
 			}
 
 			.item-time {
-				font-size: 24upx;
+				font-size: 24rpx;
 				color: #999;
 				font-weight: 400;
 			}
